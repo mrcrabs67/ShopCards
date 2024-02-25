@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { PASS, API_URL_LIST } from '../config';
 import Preloader from './Preloader';
 import ShopCard from './ShopCard';
+import Table from './Table';
 import { md5 } from 'js-md5';
 
 export default function ShopList() {
@@ -116,15 +117,18 @@ export default function ShopList() {
     }, []);
 
     return (
-        <div className="items">
-            {loading ? (
-                <Preloader />
-            ) : items.length ? (
-                items.map((item) => <ShopCard key={item.id} {...item} />)
-            ) : (
-                <p>Не удалось загрузить список</p>
-            )}
-            <div className="pages">
+        <div className="box_tbl_list">
+            <div className="items">
+                <Table />
+                {loading ? (
+                    <Preloader />
+                ) : items.length ? (
+                    items.map((item) => <ShopCard key={item.id} {...item} />)
+                ) : (
+                    <p>Не удалось загрузить список</p>
+                )}
+                <div className="pages"></div>
+
                 {pages.map((page, index) => (
                     <span
                         key={index}

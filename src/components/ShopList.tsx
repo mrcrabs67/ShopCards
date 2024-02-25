@@ -6,14 +6,20 @@ import { md5 } from 'js-md5';
 
 export default function ShopList() {
     const [items, setItems] = useState<any[]>([]);
+    const [elementsId, setElementsId] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
+    const elements = [];
+
+    const pages = [1, 2, 3, 4, 5];
+    const currentPage = 3;
+
     useEffect(() => {
-        const options: any = {
+        const optionsids: any = {
             method: 'POST',
             // mode: "cors",
             headers: {
-                'X-Auth': md5(PASS + '_20240223'),
+                'X-Auth': md5(PASS + '_20240225'),
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
@@ -21,19 +27,10 @@ export default function ShopList() {
             }),
         };
 
-        fetch(API_URL_LIST, options)
+        fetch(API_URL_LIST, optionsids)
             .then((response) => response.json())
             .then((result) => {
                 console.log(result);
-                // setItems([
-                //     ...items,
-                //     {
-                //         id: '2',
-                //         name: 8004,
-                //         price: '666',
-                //         img: '',
-                //     },
-                // ]);
                 // result.result.map((res) =>
                 //     setItems([
                 //         ...items,
@@ -45,27 +42,77 @@ export default function ShopList() {
                 //         },
                 //     ])
                 // );
-                result.result.forEach((res) => {
-                    // console.log(res);
-                    setItems((items) => [
-                        ...items,
-                        {
-                            id: res,
-                            name: res,
-                            price: res,
-                            brand: res,
-                        },
-                    ]);
-                    // console.log(items);
-                });
-                console.log(items);
+                // const length: number = result.result.length;
+
+                // result.result.forEach((res) => {
+                //     // debugger;
+                //     // console.log(elementsId);
+                //     setElementsId((elementsId) => [...elementsId, res]);
+                // });
+                // console.log('elements = ', elementsId);
+
+                if (result.result.length > 0) {
+                    for (let i = 0; i < 50; i++) {
+                        elements.push(result.result[i]);
+                    }
+                }
+                // console.log('elements = ', elements);
+
+                // elements.length > 0
+                //     ? elements.forEach((el) => {
+                //           setItems((items) => [...items, {}]);
+                //       })
+                //     : (elements.length = 0);
+
+                // console.log('length = ', length);
+                // console.log(items);
                 setLoading(false);
+
+                //Запрашиваем данные для 50 элементов
+                const optionsitems: any = {
+                    method: 'POST',
+                    // mode: "cors",
+                    headers: {
+                        'X-Auth': md5(PASS + '_20240225'),
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'get_items',
+                        params: {
+                            ids: elements,
+                        },
+                    }),
+                };
+
+                fetch(API_URL_LIST, optionsitems)
+                    .then((response) => response.json())
+                    .then((result) => {
+                        console.log('Данные = ', result);
+                        //
+                        result.result.forEach((res) => {
+                            // console.log(res);
+                            setItems((items) => [
+                                ...items,
+                                {
+                                    id: res.id,
+                                    name: res.product,
+                                    price: res.price,
+                                    brand: res.brand,
+                                },
+                            ]);
+                            // console.log(items);
+                        });
+                        //
+                    })
+                    .catch((error) => {
+                        console.log('error', error);
+                    });
             })
             .catch((error) => {
                 console.log('error', error);
             });
 
-        console.log(md5(PASS + '_20240223'));
+        console.log(md5(PASS + '_20240225'));
     }, []);
 
     return (
@@ -77,6 +124,16 @@ export default function ShopList() {
             ) : (
                 <p>Не удалось загрузить список</p>
             )}
+            <div className="pages">
+                {pages.map((page, index) => (
+                    <span
+                        key={index}
+                        className={currentPage == page ? 'curent-page' : 'page'}
+                    >
+                        {page}
+                    </span>
+                ))}
+            </div>
         </div>
     );
 }

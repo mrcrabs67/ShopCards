@@ -5,7 +5,14 @@ import ShopCard from './ShopCard';
 import Table from './Table';
 import { md5 } from 'js-md5';
 
+import { useSelector, useDispatch } from 'react-redux'
+import { updatePagination, paginationState } from '../store/Map/paginationSlice'
+
 export default function ShopList() {
+
+    const pagination = useSelector(paginationState);
+    const dispatch = useDispatch();
+
     const [items, setItems] = useState<any[]>([]);
     const [elementsId, setElementsId] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -20,7 +27,7 @@ export default function ShopList() {
             method: 'POST',
             // mode: "cors",
             headers: {
-                'X-Auth': md5(PASS + '_20240225'),
+                'X-Auth': md5(PASS + '_20240227'),
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
@@ -74,7 +81,7 @@ export default function ShopList() {
                     method: 'POST',
                     // mode: "cors",
                     headers: {
-                        'X-Auth': md5(PASS + '_20240225'),
+                        'X-Auth': md5(PASS + '_20240227'),
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
@@ -119,7 +126,14 @@ export default function ShopList() {
     return (
         <div className="box_tbl_list">
             <div className="items">
-                <Table />
+                <div><span>pagination = {pagination}</span></div>
+                <div>
+                    <button onClick={() => {
+                        dispatch(updatePagination(1));
+                        console.log(pagination);
+                    }}>1</button>
+                </div>
+                <Table/>
                 {loading ? (
                     <Preloader />
                 ) : items.length ? (

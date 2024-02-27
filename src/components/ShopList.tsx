@@ -1,156 +1,79 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { PASS, API_URL_LIST } from '../config';
 import Preloader from './Preloader';
 import ShopCard from './ShopCard';
 import Table from './Table';
-import { md5 } from 'js-md5';
 
 import { useSelector, useDispatch } from 'react-redux'
-import { updatePagination, paginationState } from '../store/Map/paginationSlice'
+import {
+    currentPageNumberSelector,
+    maxPageNumberSelector,
+    productsIdsSelector,
+    productsSelector,
+} from "@store/products/selectors";
+import {fetchProductsByIds} from "@store/products/thunks";
+import {DEFAULT_ITEMS_PER_PAGE, setCurrentPageNumber} from "@store/products/reducer";
+
+const arrayRange = (start, stop, step) =>
+    Array.from(
+        { length: (stop - start) / step + 1 },
+        (value, index) => start + index * step
+    );
 
 export default function ShopList() {
-
-    const pagination = useSelector(paginationState);
     const dispatch = useDispatch();
 
-    const [items, setItems] = useState<any[]>([]);
-    const [elementsId, setElementsId] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
-
-    const elements = [];
-
-    const pages = [1, 2, 3, 4, 5];
-    const currentPage = 3;
+    const currentPageNumber = useSelector(currentPageNumberSelector);
+    const productsIds = useSelector(productsIdsSelector);
+    const maxPageNumber = useSelector(maxPageNumberSelector);
+    const products = useSelector(productsSelector);
 
     useEffect(() => {
-        const optionsids: any = {
-            method: 'POST',
-            // mode: "cors",
-            headers: {
-                'X-Auth': md5(PASS + '_20240227'),
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                action: 'get_ids',
-            }),
-        };
+        const lastItemIndex = DEFAULT_ITEMS_PER_PAGE * currentPageNumber;
+        const foundedIds = productsIds?.slice(lastItemIndex - (DEFAULT_ITEMS_PER_PAGE - 1), lastItemIndex);
 
-        fetch(API_URL_LIST, optionsids)
-            .then((response) => response.json())
-            .then((result) => {
-                console.log(result);
-                // result.result.map((res) =>
-                //     setItems([
-                //         ...items,
-                //         {
-                //             id: res,
-                //             name: res,
-                //             price: res,
-                //             brand: res,
-                //         },
-                //     ])
-                // );
-                // const length: number = result.result.length;
+        dispatch(fetchProductsByIds(foundedIds));
+    }, [dispatch, productsIds, currentPageNumber]);
 
-                // result.result.forEach((res) => {
-                //     // debugger;
-                //     // console.log(elementsId);
-                //     setElementsId((elementsId) => [...elementsId, res]);
-                // });
-                // console.log('elements = ', elementsId);
+    const pageNumbers = useMemo(() => {
+        return arrayRange(1, maxPageNumber, 1);
+    }, [maxPageNumber])
 
-                if (result.result.length > 0) {
-                    for (let i = 0; i < 50; i++) {
-                        elements.push(result.result[i]);
-                    }
-                }
-                // console.log('elements = ', elements);
-
-                // elements.length > 0
-                //     ? elements.forEach((el) => {
-                //           setItems((items) => [...items, {}]);
-                //       })
-                //     : (elements.length = 0);
-
-                // console.log('length = ', length);
-                // console.log(items);
-                setLoading(false);
-
-                //Запрашиваем данные для 50 элементов
-                const optionsitems: any = {
-                    method: 'POST',
-                    // mode: "cors",
-                    headers: {
-                        'X-Auth': md5(PASS + '_20240227'),
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        action: 'get_items',
-                        params: {
-                            ids: elements,
-                        },
-                    }),
-                };
-
-                fetch(API_URL_LIST, optionsitems)
-                    .then((response) => response.json())
-                    .then((result) => {
-                        console.log('Данные = ', result);
-                        //
-                        result.result.forEach((res) => {
-                            // console.log(res);
-                            setItems((items) => [
-                                ...items,
-                                {
-                                    id: res.id,
-                                    name: res.product,
-                                    price: res.price,
-                                    brand: res.brand,
-                                },
-                            ]);
-                            // console.log(items);
-                        });
-                        //
-                    })
-                    .catch((error) => {
-                        console.log('error', error);
-                    });
-            })
-            .catch((error) => {
-                console.log('error', error);
-            });
-
-        console.log(md5(PASS + '_20240225'));
-    }, []);
+    const changeCurrentPageNumberHandler = useCallback((number) => {
+        console.log('setCurrentPageNumber', number);
+        if (currentPageNumber !== number) {
+            dispatch(setCurrentPageNumber(number))
+        }
+    }, [dispatch, currentPageNumber]);
 
     return (
         <div className="box_tbl_list">
+            <table>
+                <thead>
+                <tr>
+                    <th className="text-center">Номер</th>
+                    <th className="text-center">Название</th>
+                    <th className="text-center">Цена</th>
+                    <th className="text-center">Бренд</th>
+                </tr>
+                </thead>
+                <tbody>
+                {products.map((product: any) => (<ShopCard key={product.id} {...product} />))}
+                </tbody>
+            </table>
             <div className="items">
-                <div><span>pagination = {pagination}</span></div>
-                <div>
-                    <button onClick={() => {
-                        dispatch(updatePagination(1));
-                        console.log(pagination);
-                    }}>1</button>
+                <div className="pages">
+                    {pageNumbers.map((pageNumber) => (
+                        <span
+                            onClick={() => changeCurrentPageNumberHandler(pageNumber)}
+                            // disabled={ currentPageNumber === pageNumber }
+                            key={pageNumber}
+                            className={currentPageNumber === pageNumber ? 'curent-page' : 'page'}
+                        >
+                            {pageNumber}
+                        </span>
+                    ))}
                 </div>
-                <Table/>
-                {loading ? (
-                    <Preloader />
-                ) : items.length ? (
-                    items.map((item) => <ShopCard key={item.id} {...item} />)
-                ) : (
-                    <p>Не удалось загрузить список</p>
-                )}
-                <div className="pages"></div>
-
-                {pages.map((page, index) => (
-                    <span
-                        key={index}
-                        className={currentPage == page ? 'curent-page' : 'page'}
-                    >
-                        {page}
-                    </span>
-                ))}
             </div>
         </div>
     );

@@ -1,5 +1,6 @@
 import React from 'react';
 
+// несколько семантических header
 export default function Header() {
     return (
         <header>

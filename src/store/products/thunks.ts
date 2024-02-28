@@ -13,7 +13,7 @@ const optionsIds: any = {
     method: 'POST',
     // mode: "cors",
     headers: {
-        'X-Auth': md5(PASS + '_20240227'),
+        'X-Auth': md5(PASS + '_20240228'),
         'Content-Type': 'application/json',
     },
     body: JSON.stringify({
@@ -52,7 +52,7 @@ export const fetchProductsByIds =
                 method: 'POST',
                 // mode: "cors",
                 headers: {
-                    'X-Auth': md5(PASS + '_20240227'),
+                    'X-Auth': md5(PASS + '_20240228'),
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({

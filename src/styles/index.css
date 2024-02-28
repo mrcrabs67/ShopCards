@@ -71,3 +71,15 @@ TD, TH {
     border: 2px solid gray;
     font-weight: 700;
 }
+
+.box_tbl_list {
+    display: flex;
+    flex-direction: column;
+}
+
+.pages {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 5px;
+}

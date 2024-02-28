@@ -16,6 +16,7 @@ export type ProductsState = {
     products: object[];
     currentPageNumber: number;
     maxPageNumber: number;
+    siblingCount: number;
     errorCode: string | null;
 };
 
@@ -24,6 +25,7 @@ export const initialProductsState: ProductsState = {
     products: [],
     currentPageNumber: 1,
     maxPageNumber: 1,
+    siblingCount: 1,
     errorCode: null,
 };
 
@@ -46,12 +48,17 @@ const slice = createSlice({
         setErrorCode: (state, action: PayloadAction<string | null>) => {
             state.errorCode = action.payload;
         },
-
     },
 });
 
 const { reducer } = slice;
 
-export const { setProductsIds, setProducts, setCurrentPageNumber, setMaxPageNumber, setErrorCode } = slice.actions;
+export const {
+    setProductsIds,
+    setProducts,
+    setCurrentPageNumber,
+    setMaxPageNumber,
+    setErrorCode,
+} = slice.actions;
 
 export default reducer;

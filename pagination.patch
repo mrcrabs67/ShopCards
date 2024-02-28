@@ -1,0 +1,769 @@
+Index: README.md
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/README.md b/README.md
+--- a/README.md	(revision f3e052e74dc3cbf9196d3a8735293cd4c025af4a)
++++ b/README.md	(revision 51a981fd76feff0f395f5aa67a139d160b523694)
+@@ -80,7 +80,7 @@
+     ├── services                # API calls
+     ├── static                  # static assets
+     ├── store                   # Redux store
+-        ├── Map                 # contains reducer, selectors and thunks for Map "slice" of the redux store
++        ├── products                 # contains reducer, selectors and thunks for products "slice" of the redux store
+         ├── configureStore.ts   # configure the app's redux store
+         ├── getPreloadedState.ts 
+         ├── rootReducers.ts     # combine reducers from all slices
+@@ -113,4 +113,4 @@
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+-limitations under the License.
+\ No newline at end of file
++limitations under the License.
+Index: src/components/Header.tsx
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/components/Header.tsx b/src/components/Header.tsx
+--- a/src/components/Header.tsx	(revision f3e052e74dc3cbf9196d3a8735293cd4c025af4a)
++++ b/src/components/Header.tsx	(revision 51a981fd76feff0f395f5aa67a139d160b523694)
+@@ -1,5 +1,6 @@
+ import React from 'react';
+ 
++// несколько семантических header
+ export default function Header() {
+     return (
+         <header>
+Index: src/components/MapView/MapViewContainer.tsx
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/components/MapView/MapViewContainer.tsx b/src/components/MapView/MapViewContainer.tsx
+--- a/src/components/MapView/MapViewContainer.tsx	(revision f3e052e74dc3cbf9196d3a8735293cd4c025af4a)
++++ b/src/components/MapView/MapViewContainer.tsx	(revision 51a981fd76feff0f395f5aa67a139d160b523694)
+@@ -1,7 +1,7 @@
+ import React from 'react';
+ import { useSelector } from 'react-redux';
+ import MapView from './MapView';
+-import { selectWebmapId } from '@store/Map/selectors';
++import { selectWebmapId } from '@store/products/selectors';
+ 
+ const MapViewContainer = () => {
+     const webmapId = useSelector(selectWebmapId);
+Index: src/components/ShopList.tsx
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/components/ShopList.tsx b/src/components/ShopList.tsx
+--- a/src/components/ShopList.tsx	(revision f3e052e74dc3cbf9196d3a8735293cd4c025af4a)
++++ b/src/components/ShopList.tsx	(revision 51a981fd76feff0f395f5aa67a139d160b523694)
+@@ -1,156 +1,66 @@
+-import React, { useState, useEffect } from 'react';
++import React, { useState, useEffect, useMemo, useCallback } from 'react';
+ import { PASS, API_URL_LIST } from '../config';
+ import Preloader from './Preloader';
+ import ShopCard from './ShopCard';
+ import Table from './Table';
+-import { md5 } from 'js-md5';
+ 
+ import { useSelector, useDispatch } from 'react-redux'
+-import { updatePagination, paginationState } from '../store/Map/paginationSlice'
++import {
++    currentPageNumberSelector,
++    maxPageNumberSelector,
++    productsIdsSelector,
++    productsSelector,
++} from "@store/products/selectors";
++import {fetchProductsByIds} from "@store/products/thunks";
++import {DEFAULT_ITEMS_PER_PAGE, setCurrentPageNumber} from "@store/products/reducer";
++
++const arrayRange = (start, stop, step) =>
++    Array.from(
++        { length: (stop - start) / step + 1 },
++        (value, index) => start + index * step
++    );
+ 
+ export default function ShopList() {
+-
+-    const pagination = useSelector(paginationState);
+     const dispatch = useDispatch();
+ 
+-    const [items, setItems] = useState<any[]>([]);
+-    const [elementsId, setElementsId] = useState<any[]>([]);
+-    const [loading, setLoading] = useState(true);
+-
+-    const elements = [];
+-
+-    const pages = [1, 2, 3, 4, 5];
+-    const currentPage = 3;
++    const currentPageNumber = useSelector(currentPageNumberSelector);
++    const productsIds = useSelector(productsIdsSelector);
++    const maxPageNumber = useSelector(maxPageNumberSelector);
++    const products = useSelector(productsSelector);
+ 
+     useEffect(() => {
+-        const optionsids: any = {
+-            method: 'POST',
+-            // mode: "cors",
+-            headers: {
+-                'X-Auth': md5(PASS + '_20240227'),
+-                'Content-Type': 'application/json',
+-            },
+-            body: JSON.stringify({
+-                action: 'get_ids',
+-            }),
+-        };
++        const lastItemIndex = DEFAULT_ITEMS_PER_PAGE * currentPageNumber;
++        const foundedIds = productsIds?.slice(lastItemIndex - (DEFAULT_ITEMS_PER_PAGE - 1), lastItemIndex);
+ 
+-        fetch(API_URL_LIST, optionsids)
+-            .then((response) => response.json())
+-            .then((result) => {
+-                console.log(result);
+-                // result.result.map((res) =>
+-                //     setItems([
+-                //         ...items,
+-                //         {
+-                //             id: res,
+-                //             name: res,
+-                //             price: res,
+-                //             brand: res,
+-                //         },
+-                //     ])
+-                // );
+-                // const length: number = result.result.length;
++        dispatch(fetchProductsByIds(foundedIds));
++    }, [dispatch, productsIds, currentPageNumber]);
+ 
+-                // result.result.forEach((res) => {
+-                //     // debugger;
+-                //     // console.log(elementsId);
+-                //     setElementsId((elementsId) => [...elementsId, res]);
+-                // });
+-                // console.log('elements = ', elementsId);
++    const pageNumbers = useMemo(() => {
++        return arrayRange(1, maxPageNumber, 1);
++    }, [maxPageNumber])
+ 
+-                if (result.result.length > 0) {
+-                    for (let i = 0; i < 50; i++) {
+-                        elements.push(result.result[i]);
+-                    }
+-                }
+-                // console.log('elements = ', elements);
+-
+-                // elements.length > 0
+-                //     ? elements.forEach((el) => {
+-                //           setItems((items) => [...items, {}]);
+-                //       })
+-                //     : (elements.length = 0);
+-
+-                // console.log('length = ', length);
+-                // console.log(items);
+-                setLoading(false);
+-
+-                //Запрашиваем данные для 50 элементов
+-                const optionsitems: any = {
+-                    method: 'POST',
+-                    // mode: "cors",
+-                    headers: {
+-                        'X-Auth': md5(PASS + '_20240227'),
+-                        'Content-Type': 'application/json',
+-                    },
+-                    body: JSON.stringify({
+-                        action: 'get_items',
+-                        params: {
+-                            ids: elements,
+-                        },
+-                    }),
+-                };
+-
+-                fetch(API_URL_LIST, optionsitems)
+-                    .then((response) => response.json())
+-                    .then((result) => {
+-                        console.log('Данные = ', result);
+-                        //
+-                        result.result.forEach((res) => {
+-                            // console.log(res);
+-                            setItems((items) => [
+-                                ...items,
+-                                {
+-                                    id: res.id,
+-                                    name: res.product,
+-                                    price: res.price,
+-                                    brand: res.brand,
+-                                },
+-                            ]);
+-                            // console.log(items);
+-                        });
+-                        //
+-                    })
+-                    .catch((error) => {
+-                        console.log('error', error);
+-                    });
+-            })
+-            .catch((error) => {
+-                console.log('error', error);
+-            });
+-
+-        console.log(md5(PASS + '_20240225'));
+-    }, []);
++    const changeCurrentPageNumberHandler = useCallback((number) => {
++        if (!currentPageNumber === number) {
++            dispatch(setCurrentPageNumber(number))
++        }
++    }, [dispatch, currentPageNumber]);
+ 
+     return (
+         <div className="box_tbl_list">
+             <div className="items">
+-                <div><span>pagination = {pagination}</span></div>
+-                <div>
+-                    <button onClick={() => {
+-                        dispatch(updatePagination(1));
+-                        console.log(pagination);
+-                    }}>1</button>
++                { products.map((product) => (<ShopCard key={product.id} {...product} />) }
++                <div className="pages">
++                    {pageNumbers.map((pageNumber) => (
++                        <button
++                            onClick={ () => changeCurrentPageNumberHandler(pageNumber) }
++                            disabled={ currentPageNumber === pageNumber }
++                            key={pageNumber}
++                            className={currentPageNumber === pageNumber ? 'curent-page' : 'page'}
++                        >
++                            {pageNumber}
++                        </button>
++                    ))}
+                 </div>
+-                <Table/>
+-                {loading ? (
+-                    <Preloader />
+-                ) : items.length ? (
+-                    items.map((item) => <ShopCard key={item.id} {...item} />)
+-                ) : (
+-                    <p>Не удалось загрузить список</p>
+-                )}
+-                <div className="pages"></div>
+-
+-                {pages.map((page, index) => (
+-                    <span
+-                        key={index}
+-                        className={currentPage == page ? 'curent-page' : 'page'}
+-                    >
+-                        {page}
+-                    </span>
+-                ))}
+             </div>
+         </div>
+     );
+Index: src/components/WebMapSelector/WebMapSelector.tsx
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/components/WebMapSelector/WebMapSelector.tsx b/src/components/WebMapSelector/WebMapSelector.tsx
+--- a/src/components/WebMapSelector/WebMapSelector.tsx	(revision f3e052e74dc3cbf9196d3a8735293cd4c025af4a)
++++ b/src/components/WebMapSelector/WebMapSelector.tsx	(revision 51a981fd76feff0f395f5aa67a139d160b523694)
+@@ -1,9 +1,9 @@
+ import React from 'react';
+ import { useSelector } from 'react-redux';
+ import { useDispatch } from 'react-redux';
+-import { selectWebmapId } from '@store/Map/selectors';
++import { selectWebmapId } from '@store/products/selectors';
+ import classNames from 'classnames';
+-import { updateWebmapId } from '@store/Map/thunks';
++import { updateWebmapId } from '@store/products/thunks';
+ 
+ const WebMapOptions = [
+     { name: 'Topo', id: '67372ff42cd145319639a99152b15bc3' },
+@@ -11,7 +11,7 @@
+ ];
+ 
+ /**
+- * Select a web map to be used in the Map View
++ * Select a web map to be used in the products View
+  */
+ const WebMapSelector = () => {
+     const dispatch = useDispatch();
+Index: src/index.tsx
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/index.tsx b/src/index.tsx
+--- a/src/index.tsx	(revision f3e052e74dc3cbf9196d3a8735293cd4c025af4a)
++++ b/src/index.tsx	(revision 51a981fd76feff0f395f5aa67a139d160b523694)
+@@ -9,26 +9,24 @@
+ import {Provider} from "react-redux";
+ // import { BrowserRouter } from 'react-router-dom'
+ //
+-// import configureAppStore, { getPreloadedState } from './store/configureStore';
++import configureAppStore, { getPreloadedState } from './store/configureStore';
+ 
+ import AppContextProvider from './contexts/AppContextProvider';
+ 
+ import HomePage from './pages/Home/Home';
+ 
+ (async () => {
+-    // const preloadedState = getPreloadedState();
++    const preloadedState = getPreloadedState();
+ 
+     const root = createRoot(document.getElementById('root'));
+ 
+     root.render(
+         // <React.StrictMode>
+-        // <ReduxProvider store={configureAppStore(preloadedState)}>
+-        <Provider store={store}>
++        <ReduxProvider store={configureAppStore(preloadedState)}>
+             <AppContextProvider>
+                 <HomePage />
+             </AppContextProvider>
+-        </Provider>
+-        // </ReduxProvider>
++        </ReduxProvider>
+         // </React.StrictMode>
+     );
+ })();
+Index: src/pages/Home/Home.tsx
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/pages/Home/Home.tsx b/src/pages/Home/Home.tsx
+--- a/src/pages/Home/Home.tsx	(revision f3e052e74dc3cbf9196d3a8735293cd4c025af4a)
++++ b/src/pages/Home/Home.tsx	(revision 51a981fd76feff0f395f5aa67a139d160b523694)
+@@ -1,10 +1,22 @@
+-import React from 'react';
++import React, { useEffect } from 'react';
+ import { ErrorBoundary } from '@components/ErrorBoundary';
+ import Header from '../../components/Header';
+ import Content from '../../components/Content';
+ import Footer from '../../components/Footer';
++import { useSelector, useDispatch } from 'react-redux'
++import {fetchProductsIds} from "@store/products/thunks";
+ 
++// семантика нарушена, в хэдере контент и футер
+ const Home = () => {
++    const dispatch = useDispatch();
++
++    useEffect(() => {
++        dispatch(fetchProductsIds()); // вызов один раз
++        return () => {
++            // код при размонтировании компонента
++        }
++    }, [dispatch]);
++
+     return (
+         <ErrorBoundary>
+             <div className="App">
+Index: src/store/Map/paginationSlice.ts
+===================================================================
+diff --git a/src/store/Map/paginationSlice.ts b/src/store/Map/paginationSlice.ts
+deleted file mode 100644
+--- a/src/store/Map/paginationSlice.ts	(revision f3e052e74dc3cbf9196d3a8735293cd4c025af4a)
++++ /dev/null	(revision f3e052e74dc3cbf9196d3a8735293cd4c025af4a)
+@@ -1,18 +0,0 @@
+-import { createSlice } from '@reduxjs/toolkit';
+-
+-export const paginationSlice = createSlice({
+-    name: 'pagination',
+-    initialState: {
+-        value: [],
+-    },
+-    reducers: {
+-        updatePagination: (state, action) => {
+-            state.value.push(action.payload);
+-        },
+-    },
+-});
+-
+-export const { updatePagination } = paginationSlice.actions;
+-export const paginationState = (state) => state.pagination.value;
+-
+-export default paginationSlice.reducer;
+Index: src/store/Map/reducer.test.ts
+===================================================================
+diff --git a/src/store/Map/reducer.test.ts b/src/store/Map/reducer.test.ts
+deleted file mode 100644
+--- a/src/store/Map/reducer.test.ts	(revision f3e052e74dc3cbf9196d3a8735293cd4c025af4a)
++++ /dev/null	(revision f3e052e74dc3cbf9196d3a8735293cd4c025af4a)
+@@ -1,13 +0,0 @@
+-import reducer, { initialMapState, webmapIdChanged } from './reducer';
+-
+-describe('Redux Store - test Map reducer', () => {
+-    it('should contain correct initial state', () => {
+-        const initialState = reducer(initialMapState, {} as any);
+-        expect(initialState).toMatchObject(initialMapState);
+-    });
+-
+-    it('should handle webmapIdChanged action', () => {
+-        const newState = reducer(initialMapState, webmapIdChanged('12345'));
+-        expect(newState.webmapId).toEqual('12345');
+-    });
+-});
+Index: src/store/Map/reducer.ts
+===================================================================
+diff --git a/src/store/Map/reducer.ts b/src/store/Map/reducer.ts
+deleted file mode 100644
+--- a/src/store/Map/reducer.ts	(revision f3e052e74dc3cbf9196d3a8735293cd4c025af4a)
++++ /dev/null	(revision f3e052e74dc3cbf9196d3a8735293cd4c025af4a)
+@@ -1,33 +0,0 @@
+-import {
+-    createSlice,
+-    // createSelector,
+-    PayloadAction,
+-    // createAsyncThunk
+-} from '@reduxjs/toolkit';
+-
+-// import { RootState, StoreDispatch, StoreGetState } from '../configureStore';
+-
+-export type MapState = {
+-    // ArcGIS Online Webmap Item Id
+-    webmapId: string;
+-};
+-
+-export const initialMapState: MapState = {
+-    webmapId: '67372ff42cd145319639a99152b15bc3', // Topographic
+-};
+-
+-const slice = createSlice({
+-    name: 'Map',
+-    initialState: initialMapState,
+-    reducers: {
+-        webmapIdChanged: (state, action: PayloadAction<string>) => {
+-            state.webmapId = action.payload;
+-        },
+-    },
+-});
+-
+-const { reducer } = slice;
+-
+-export const { webmapIdChanged } = slice.actions;
+-
+-export default reducer;
+Index: src/store/Map/selectors.test.ts
+===================================================================
+diff --git a/src/store/Map/selectors.test.ts b/src/store/Map/selectors.test.ts
+deleted file mode 100644
+--- a/src/store/Map/selectors.test.ts	(revision f3e052e74dc3cbf9196d3a8735293cd4c025af4a)
++++ /dev/null	(revision f3e052e74dc3cbf9196d3a8735293cd4c025af4a)
+@@ -1,10 +0,0 @@
+-import reducer, { initialMapState, webmapIdChanged } from './reducer';
+-
+-import { selectWebmapId } from './selectors';
+-
+-describe('Redux Store - test Map selectors', () => {
+-    it('should return correct web map id', () => {
+-        const newState = reducer(initialMapState, webmapIdChanged('12345'));
+-        expect(selectWebmapId({ Map: newState } as any)).toEqual('12345');
+-    });
+-});
+Index: src/store/Map/selectors.ts
+===================================================================
+diff --git a/src/store/Map/selectors.ts b/src/store/Map/selectors.ts
+deleted file mode 100644
+--- a/src/store/Map/selectors.ts	(revision f3e052e74dc3cbf9196d3a8735293cd4c025af4a)
++++ /dev/null	(revision f3e052e74dc3cbf9196d3a8735293cd4c025af4a)
+@@ -1,7 +0,0 @@
+-import { createSelector } from '@reduxjs/toolkit';
+-import { RootState } from '../configureStore';
+-
+-export const selectWebmapId = createSelector(
+-    (state: RootState) => state.Map.webmapId,
+-    (webmapId) => webmapId
+-);
+Index: src/store/Map/thunks.test.ts
+===================================================================
+diff --git a/src/store/Map/thunks.test.ts b/src/store/Map/thunks.test.ts
+deleted file mode 100644
+--- a/src/store/Map/thunks.test.ts	(revision f3e052e74dc3cbf9196d3a8735293cd4c025af4a)
++++ /dev/null	(revision f3e052e74dc3cbf9196d3a8735293cd4c025af4a)
+@@ -1,19 +0,0 @@
+-import { updateWebmapId } from './thunks';
+-import configureAppStore, { AppStore } from '../configureStore';
+-import { selectWebmapId } from './selectors';
+-
+-describe('Redux Store - test Map thunks', () => {
+-    let store: AppStore;
+-
+-    beforeEach(() => {
+-        store = configureAppStore();
+-    });
+-
+-    it('updateWebmapId thunk should dispatch webmapIdChanged action', async () => {
+-        const newWebMapId = `12345`;
+-
+-        await store.dispatch(updateWebmapId(newWebMapId));
+-
+-        expect(selectWebmapId(store.getState())).toEqual(newWebMapId);
+-    });
+-});
+Index: src/store/Map/thunks.ts
+===================================================================
+diff --git a/src/store/Map/thunks.ts b/src/store/Map/thunks.ts
+deleted file mode 100644
+--- a/src/store/Map/thunks.ts	(revision f3e052e74dc3cbf9196d3a8735293cd4c025af4a)
++++ /dev/null	(revision f3e052e74dc3cbf9196d3a8735293cd4c025af4a)
+@@ -1,17 +0,0 @@
+-import { RootState, StoreDispatch, StoreGetState } from '../configureStore';
+-import { webmapIdChanged } from './reducer';
+-
+-// Good resource about what "thunks" are, and why they're used for writing Redux logic: https://redux.js.org/usage/writing-logic-thunks
+-export const updateWebmapId =
+-    (webmapId: string) =>
+-    async (dispatch: StoreDispatch, getState: StoreGetState) => {
+-        try {
+-            // do some async work (e.g. check if the new webmap id is an valid ArcGIS Online Item)
+-            // ...
+-
+-            // now everything is ready and we can dispatch the new webmap Id to the reducer to trigger the state change
+-            dispatch(webmapIdChanged(webmapId));
+-        } catch (err) {
+-            console.error(err);
+-        }
+-    };
+Index: src/store/getPreloadedState.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/store/getPreloadedState.ts b/src/store/getPreloadedState.ts
+--- a/src/store/getPreloadedState.ts	(revision f3e052e74dc3cbf9196d3a8735293cd4c025af4a)
++++ b/src/store/getPreloadedState.ts	(revision 51a981fd76feff0f395f5aa67a139d160b523694)
+@@ -1,6 +1,6 @@
+ import { PartialRootState } from './configureStore';
+ 
+-import { initialMapState, MapState } from './Map/reducer';
++import { initialMapState, MapState } from './products/reducer';
+ 
+ const getPreloadedMapState = (): MapState => {
+     return {
+Index: src/store/products/reducer.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/store/products/reducer.ts b/src/store/products/reducer.ts
+new file mode 100644
+--- /dev/null	(revision 51a981fd76feff0f395f5aa67a139d160b523694)
++++ b/src/store/products/reducer.ts	(revision 51a981fd76feff0f395f5aa67a139d160b523694)
+@@ -0,0 +1,51 @@
++import {
++    createSlice,
++    // createSelector,
++    PayloadAction,
++    // createAsyncThunk
++} from '@reduxjs/toolkit';
++
++// import { RootState, StoreDispatch, StoreGetState } from '../configureStore';
++
++// количество элементов, кол-во на странице = 50, количество страниц (расчитываем), текущая страница
++
++export const DEFAULT_ITEMS_PER_PAGE = 50;
++
++export type ProductsState = {
++    productsIds: string[];
++    products: object[];
++    currentPageNumber: number;
++    maxPageNumber: number;
++};
++
++export const initialProductsState: ProductsState = {
++    productsIds: [],
++    products: [],
++    currentPageNumber: 1,
++    maxPageNumber: 1,
++};
++
++const slice = createSlice({
++    name: 'products',
++    initialState: initialProductsState,
++    reducers: {
++        setProductsIds: (state, action: PayloadAction<string[]>) => {
++            state.productsIds = action.payload;
++        },
++        setProducts: (state, action: PayloadAction<object[]>) => {
++            state.products = action.payload;
++        },
++        setCurrentPageNumber: (state, action: PayloadAction<number>) => {
++            state.currentPageNumber = action.payload;
++        },
++        setMaxPageNumber: (state, action: PayloadAction<number>) => {
++            state.maxPageNumber = action.payload;
++        },
++    },
++});
++
++const { reducer } = slice;
++
++export const { setProductsIds, setProducts, setCurrentPageNumber, setMaxPageNumber } = slice.actions;
++
++export default reducer;
+Index: src/store/products/selectors.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/store/products/selectors.ts b/src/store/products/selectors.ts
+new file mode 100644
+--- /dev/null	(revision 51a981fd76feff0f395f5aa67a139d160b523694)
++++ b/src/store/products/selectors.ts	(revision 51a981fd76feff0f395f5aa67a139d160b523694)
+@@ -0,0 +1,22 @@
++import { createSelector } from '@reduxjs/toolkit';
++import { RootState } from '../configureStore';
++
++export const currentPageNumberSelector = createSelector(
++    (state: RootState) => state.products.currentPageNumber,
++    (currentPageNumber) => currentPageNumber
++);
++
++export const maxPageNumberSelector = createSelector(
++    (state: RootState) => state.products.maxPageNumber,
++    (maxPageNumber) => maxPageNumber
++);
++
++export const productsIdsSelector = createSelector(
++    (state: RootState) => state.products.productsIds,
++    (productsIds) => productsIds
++);
++
++export const productsSelector = createSelector(
++    (state: RootState) => state.products.products,
++    (products) => products
++);
+Index: src/store/products/thunks.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/store/products/thunks.ts b/src/store/products/thunks.ts
+new file mode 100644
+--- /dev/null	(revision 51a981fd76feff0f395f5aa67a139d160b523694)
++++ b/src/store/products/thunks.ts	(revision 51a981fd76feff0f395f5aa67a139d160b523694)
+@@ -0,0 +1,73 @@
++import { RootState, StoreDispatch, StoreGetState } from '../configureStore';
++import {DEFAULT_ITEMS_PER_PAGE, setMaxPageNumber, setProducts, setProductsIds} from './reducer';
++import {API_URL_LIST, PASS} from "../../config";
++import { md5 } from 'js-md5';
++
++const optionsIds: any = {
++    method: 'POST',
++    // mode: "cors",
++    headers: {
++        'X-Auth': md5(PASS + '_20240227'),
++        'Content-Type': 'application/json',
++    },
++    body: JSON.stringify({
++        action: 'get_ids',
++    }),
++};
++
++// Good resource about what "thunks" are, and why they're used for writing Redux logic: https://redux.js.org/usage/writing-logic-thunks
++export const fetchProductsIds =
++    () =>
++    async (dispatch: StoreDispatch, getState: StoreGetState) => {
++        try {
++            fetch(API_URL_LIST, optionsIds)
++                .then((response) => response.json())
++                .then((result: { result: string[] }) => {
++                    const maxPageCount: number = (result?.result?.length ?? 0) / DEFAULT_ITEMS_PER_PAGE; // округлить до целочисленного в большую сторону
++
++                    dispatch(setProductsIds(result.result));
++                    dispatch(setMaxPageNumber(maxPageCount));
++                }).catch(() => {
++                    // обработка ошибки, если надо
++                })
++        } catch (err) {
++            console.error(err);
++        }
++    };
++
++export const fetchProductsByIds =
++    (productsIds: string[]) =>
++        async (dispatch: StoreDispatch, getState: StoreGetState) => {
++            try {
++                const optionsItems: any = {
++                    method: 'POST',
++                    // mode: "cors",
++                    headers: {
++                        'X-Auth': md5(PASS + '_20240227'),
++                        'Content-Type': 'application/json',
++                    },
++                    body: JSON.stringify({
++                        action: 'get_items',
++                        params: {
++                            ids: productsIds,
++                        },
++                    }),
++                };
++
++                fetch(API_URL_LIST, optionsItems)
++                    .then((response) => response.json())
++                    .then((result: { result: object[] }) => {
++                        const resultItems = result?.result?.map((item: any) => ({
++                                id: item.id,
++                                name: item.product,
++                                price: item.price,
++                                brand: item.brand,
++                            }))
++                        dispatch(setProducts(resultItems));
++                    }).catch(() => {
++                    // обработка ошибки, если надо
++                })
++            } catch (err) {
++                console.error(err);
++            }
++        };
+Index: src/store/rootReducer.ts
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/store/rootReducer.ts b/src/store/rootReducer.ts
+--- a/src/store/rootReducer.ts	(revision f3e052e74dc3cbf9196d3a8735293cd4c025af4a)
++++ b/src/store/rootReducer.ts	(revision 51a981fd76feff0f395f5aa67a139d160b523694)
+@@ -1,5 +1,5 @@
+ import { combineReducers } from 'redux';
+-import Map from './Map/reducer';
++import Map from './products/reducer';
+ 
+ export default combineReducers({
+     Map,
+Index: src/store/store.tsx
+===================================================================
+diff --git a/src/store/store.tsx b/src/store/store.tsx
+deleted file mode 100644
+--- a/src/store/store.tsx	(revision f3e052e74dc3cbf9196d3a8735293cd4c025af4a)
++++ /dev/null	(revision f3e052e74dc3cbf9196d3a8735293cd4c025af4a)
+@@ -1,8 +0,0 @@
+-import { configureStore } from '@reduxjs/toolkit';
+-import paginationReducer from './Map/paginationSlice';
+-
+-export default configureStore({
+-    reducer: {
+-        pagination: paginationReducer,
+-    }
+-})
+\ No newline at end of file
+Index: src/store/store;.tsx
+===================================================================
+diff --git a/src/store/store;.tsx b/src/store/store;.tsx
+deleted file mode 100644
+--- a/src/store/store;.tsx	(revision f3e052e74dc3cbf9196d3a8735293cd4c025af4a)
++++ /dev/null	(revision f3e052e74dc3cbf9196d3a8735293cd4c025af4a)
+@@ -1,8 +0,0 @@
+-import { configureStore } from '@reduxjs/toolkit';
+-import historyReducer from './Map/paginationSlice';
+-
+-export default configureStore({
+-    reducer: {
+-        history: historyReducer,
+-    }
+-})
+\ No newline at end of file

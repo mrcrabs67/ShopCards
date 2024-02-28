@@ -20,3 +20,7 @@ export const productsSelector = createSelector(
     (state: RootState) => state.products.products,
     (products) => products
 );
+export const siblingCountSelector = createSelector(
+    (state: RootState) => state.products.siblingCount,
+    (siblingCount) => siblingCount
+);

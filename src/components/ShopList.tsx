@@ -4,15 +4,18 @@ import Preloader from './Preloader';
 import ShopCard from './ShopCard';
 import Table from './Table';
 
-import { useSelector, useDispatch } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux';
 import {
     currentPageNumberSelector,
     maxPageNumberSelector,
     productsIdsSelector,
-    productsSelector,
-} from "@store/products/selectors";
-import {fetchProductsByIds} from "@store/products/thunks";
-import {DEFAULT_ITEMS_PER_PAGE, setCurrentPageNumber} from "@store/products/reducer";
+    productsSelector, siblingCountSelector,
+} from '@store/products/selectors';
+import { fetchProductsByIds } from '@store/products/thunks';
+import {
+    DEFAULT_ITEMS_PER_PAGE,
+    setCurrentPageNumber,
+} from '@store/products/reducer';
 
 const arrayRange = (start, stop, step) =>
     Array.from(
@@ -27,48 +30,63 @@ export default function ShopList() {
     const productsIds = useSelector(productsIdsSelector);
     const maxPageNumber = useSelector(maxPageNumberSelector);
     const products = useSelector(productsSelector);
+    const siblingCount = useSelector(siblingCountSelector);
 
     useEffect(() => {
         const lastItemIndex = DEFAULT_ITEMS_PER_PAGE * currentPageNumber;
-        const foundedIds = productsIds?.slice(lastItemIndex - (DEFAULT_ITEMS_PER_PAGE - 1), lastItemIndex);
+        const foundedIds = productsIds?.slice(
+            lastItemIndex - (DEFAULT_ITEMS_PER_PAGE - 1),
+            lastItemIndex
+        );
 
         dispatch(fetchProductsByIds(foundedIds));
     }, [dispatch, productsIds, currentPageNumber]);
 
     const pageNumbers = useMemo(() => {
         return arrayRange(1, maxPageNumber, 1);
-    }, [maxPageNumber])
+    }, [maxPageNumber]);
 
-    const changeCurrentPageNumberHandler = useCallback((number) => {
-        console.log('setCurrentPageNumber', number);
-        if (currentPageNumber !== number) {
-            dispatch(setCurrentPageNumber(number))
-        }
-    }, [dispatch, currentPageNumber]);
+    const changeCurrentPageNumberHandler = useCallback(
+        (number) => {
+            console.log('setCurrentPageNumber', number);
+            if (currentPageNumber !== number) {
+                dispatch(setCurrentPageNumber(number));
+            }
+        },
+        [dispatch, currentPageNumber]
+    );
 
     return (
         <div className="box_tbl_list">
             <table>
                 <thead>
-                <tr>
-                    <th className="text-center">Номер</th>
-                    <th className="text-center">Название</th>
-                    <th className="text-center">Цена</th>
-                    <th className="text-center">Бренд</th>
-                </tr>
+                    <tr>
+                        <th className="text-center">Номер</th>
+                        <th className="text-center">Название</th>
+                        <th className="text-center">Цена</th>
+                        <th className="text-center">Бренд</th>
+                    </tr>
                 </thead>
                 <tbody>
-                {products.map((product: any) => (<ShopCard key={product.id} {...product} />))}
+                    {products.map((product: any) => (
+                        <ShopCard key={product.id} {...product} />
+                    ))}
                 </tbody>
             </table>
             <div className="items">
                 <div className="pages">
                     {pageNumbers.map((pageNumber) => (
                         <span
-                            onClick={() => changeCurrentPageNumberHandler(pageNumber)}
+                            onClick={() =>
+                                changeCurrentPageNumberHandler(pageNumber)
+                            }
                             // disabled={ currentPageNumber === pageNumber }
                             key={pageNumber}
-                            className={currentPageNumber === pageNumber ? 'curent-page' : 'page'}
+                            className={
+                                currentPageNumber === pageNumber
+                                    ? 'curent-page'
+                                    : 'page'
+                            }
                         >
                             {pageNumber}
                         </span>

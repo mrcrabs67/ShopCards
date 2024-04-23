@@ -5,9 +5,7 @@ import { ErrorBoundary } from '@components/ErrorBoundary';
 export const ArcGISMapDemo = () => {
     return (
         <>
-            <ErrorBoundary>
-
-            </ErrorBoundary>
+            <ErrorBoundary></ErrorBoundary>
         </>
     );
 };

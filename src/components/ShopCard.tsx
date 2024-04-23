@@ -8,12 +8,11 @@ type Props = {
 };
 export default function ShopCard({ id, name, price, brand }: Props) {
     return (
-            <tr>
-                <td>id</td>
-                <td>{name}</td>
-                <td>{price}</td>
-                <td>{brand}</td>
-            </tr>
-
+        <tr>
+            <td>id</td>
+            <td>{name}</td>
+            <td>{price}</td>
+            <td>{brand}</td>
+        </tr>
     );
 }

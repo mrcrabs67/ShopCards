@@ -6,14 +6,13 @@ import {
     setProducts,
     setProductsIds,
 } from './reducer';
-import { API_URL_LIST, PASS } from '../../config';
-import { md5 } from 'js-md5';
+import { API_URL_LIST, getPass } from '../../config';
 
 const optionsIds: any = {
     method: 'POST',
     // mode: "cors",
     headers: {
-        'X-Auth': md5(PASS + '_20240228'),
+        'X-Auth': getPass(),
         'Content-Type': 'application/json',
     },
     body: JSON.stringify({
@@ -25,6 +24,7 @@ const optionsIds: any = {
 export const fetchProductsIds =
     () => async (dispatch: StoreDispatch, getState: StoreGetState) => {
         try {
+            console.log(getPass());
             fetch(API_URL_LIST, optionsIds)
                 .then((response) => response.json())
                 .then((result: { result: string[] }) => {
@@ -52,7 +52,7 @@ export const fetchProductsByIds =
                 method: 'POST',
                 // mode: "cors",
                 headers: {
-                    'X-Auth': md5(PASS + '_20240228'),
+                    'X-Auth': getPass(),
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({

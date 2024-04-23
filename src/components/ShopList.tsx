@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { PASS, API_URL_LIST } from '../config';
+import { API_URL_LIST } from '../config';
 import Preloader from './Preloader';
 import ShopCard from './ShopCard';
 import Table from './Table';
@@ -9,7 +9,8 @@ import {
     currentPageNumberSelector,
     maxPageNumberSelector,
     productsIdsSelector,
-    productsSelector, siblingCountSelector,
+    productsSelector,
+    siblingCountSelector,
 } from '@store/products/selectors';
 import { fetchProductsByIds } from '@store/products/thunks';
 import {

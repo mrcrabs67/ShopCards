@@ -6,7 +6,6 @@ import Footer from '../../components/Footer';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchProductsIds } from '@store/products/thunks';
 
-// семантика нарушена, в хэдере контент и футер
 const Home = () => {
     const dispatch = useDispatch();
 
@@ -20,11 +19,9 @@ const Home = () => {
     return (
         <ErrorBoundary>
             <div className="App">
-                <header className="App-header">
-                    <Header />
-                    <Content />
-                    <Footer />
-                </header>
+                <Header />
+                <Content />
+                <Footer />
             </div>
         </ErrorBoundary>
     );

@@ -9,7 +9,7 @@ import {
 
 // количество элементов, кол-во на странице = 50, количество страниц (расчитываем), текущая страница
 
-export const DEFAULT_ITEMS_PER_PAGE = 50;
+export const DEFAULT_ITEMS_PER_PAGE = 20;
 
 export type ProductsState = {
     productsIds: string[];

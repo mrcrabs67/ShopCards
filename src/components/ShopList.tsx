@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { API_URL_LIST } from '../config';
 import Preloader from './Preloader';
 import ShopCard from './ShopCard';
-import Table from './Table';
 
 import { useSelector, useDispatch } from 'react-redux';
 import {

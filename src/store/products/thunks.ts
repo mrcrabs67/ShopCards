@@ -8,22 +8,22 @@ import {
 } from './reducer';
 import { API_URL_LIST, getPass } from '../../config';
 
-const optionsIds: any = {
-    method: 'POST',
-    // mode: "cors",
-    headers: {
-        'X-Auth': getPass(),
-        'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-        action: 'get_ids',
-    }),
-};
-
 // Good resource about what "thunks" are, and why they're used for writing Redux logic: https://redux.js.org/usage/writing-logic-thunks
 export const fetchProductsIds =
     () => async (dispatch: StoreDispatch, getState: StoreGetState) => {
         try {
+            const optionsIds: any = {
+                method: 'POST',
+                // mode: "cors",
+                headers: {
+                    'X-Auth': getPass(),
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    action: 'get_ids',
+                }),
+            };
+
             console.log(getPass());
             fetch(API_URL_LIST, optionsIds)
                 .then((response) => response.json())

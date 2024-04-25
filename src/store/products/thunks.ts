@@ -37,7 +37,7 @@ export const fetchProductsIds =
                 })
                 .catch((e) => {
                     // обработка ошибки, если надо
-                    dispatch(setErrorCode(e));
+                    dispatch(setErrorCode(e.message));
                 });
         } catch (err) {
             console.error(err);
@@ -77,7 +77,7 @@ export const fetchProductsByIds =
                 })
                 .catch((e) => {
                     // обработка ошибки, если надо
-                    dispatch(setErrorCode(e));
+                    dispatch(setErrorCode(e.message));
                 });
         } catch (err) {
             console.error(err);

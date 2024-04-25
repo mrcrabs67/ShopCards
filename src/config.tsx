@@ -1,5 +1,5 @@
 import { md5 } from 'js-md5';
-export const API_URL_LIST = 'http://api.valantis.store:40000/';
+export const API_URL_LIST = 'https://api.valantis.store:40000/';
 
 export const getPass = () => {
     let PASS = 'Valantis_';

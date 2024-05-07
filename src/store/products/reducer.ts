@@ -9,14 +9,18 @@ import {
 
 // количество элементов, кол-во на странице = 50, количество страниц (расчитываем), текущая страница
 
-export const DEFAULT_ITEMS_PER_PAGE = 20;
+export const DEFAULT_ITEMS_PER_PAGE = 15; //represents the maximum data that is visible in a single page.
+/*
+totalCount: represents the total count of data available from the source.
+onPageChange: callback function invoked with the updated page value when the page is changed.
+* */
 
 export type ProductsState = {
     productsIds: string[];
     products: object[];
-    currentPageNumber: number;
+    currentPageNumber: number; //represents the current active page. We'll use a 1-based index instead of a traditional 0-based index for our value.currentPage
     maxPageNumber: number;
-    siblingCount: number;
+    siblingCount: number; //(optional): represents the min number of page buttons to be shown on each side of the current page button. Defaults to 1.
     errorCode: string | null;
 };
 

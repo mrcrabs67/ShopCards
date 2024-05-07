@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import Preloader from './Preloader';
+import Pagination from 'react-js-pagination';
 import ShopCard from './ShopCard';
 
 import { useSelector, useDispatch } from 'react-redux';
@@ -73,24 +74,33 @@ export default function ShopList() {
                 </tbody>
             </table>
             <div className="items">
-                <div className="pages">
-                    {pageNumbers.map((pageNumber) => (
-                        <span
-                            onClick={() =>
-                                changeCurrentPageNumberHandler(pageNumber)
-                            }
-                            // disabled={ currentPageNumber === pageNumber }
-                            key={pageNumber}
-                            className={
-                                currentPageNumber === pageNumber
-                                    ? 'curent-page'
-                                    : 'page'
-                            }
-                        >
-                            {pageNumber}
-                        </span>
-                    ))}
-                </div>
+                <Pagination
+                    activePage={currentPageNumber}
+                    // itemsCountPerPage={10}
+                    totalItemsCount={maxPageNumber}
+                    pageRangeDisplayed={5}
+                    onChange={changeCurrentPageNumberHandler}
+                    activeClass={'activePage'}
+                />
+
+                {/*<div className="pages">*/}
+                {/*    {pageNumbers.map((pageNumber) => (*/}
+                {/*        <span*/}
+                {/*            onClick={() =>*/}
+                {/*                changeCurrentPageNumberHandler(pageNumber)*/}
+                {/*            }*/}
+                {/*            // disabled={ currentPageNumber === pageNumber }*/}
+                {/*            key={pageNumber}*/}
+                {/*            className={*/}
+                {/*                currentPageNumber === pageNumber*/}
+                {/*                    ? 'curent-page'*/}
+                {/*                    : 'page'*/}
+                {/*            }*/}
+                {/*        >*/}
+                {/*            {pageNumber}*/}
+                {/*        </span>*/}
+                {/*    ))}*/}
+                {/*</div>*/}
             </div>
         </div>
     );

@@ -28,8 +28,9 @@ export const fetchProductsIds =
             fetch(API_URL_LIST, optionsIds)
                 .then((response) => response.json())
                 .then((result: { result: string[] }) => {
-                    const maxPageCount: number =
-                        (result?.result?.length ?? 0) / DEFAULT_ITEMS_PER_PAGE; // округлить до целочисленного в большую сторону
+                    const maxPageCount: number = Math.ceil(
+                        (result?.result?.length ?? 0) / DEFAULT_ITEMS_PER_PAGE
+                    ); // округлить до целочисленного в большую сторону
 
                     dispatch(setProductsIds(result.result));
                     dispatch(setMaxPageNumber(maxPageCount));

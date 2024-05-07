@@ -38,6 +38,7 @@ export const fetchProductsIds =
                 .catch((e) => {
                     // обработка ошибки, если надо
                     dispatch(setErrorCode(e.message));
+                    dispatch(fetchProductsIds());
                 });
         } catch (err) {
             console.error(err);
@@ -78,6 +79,7 @@ export const fetchProductsByIds =
                 .catch((e) => {
                     // обработка ошибки, если надо
                     dispatch(setErrorCode(e.message));
+                    dispatch(fetchProductsByIds(optionsItems));
                 });
         } catch (err) {
             console.error(err);

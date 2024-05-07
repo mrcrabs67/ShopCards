@@ -14,6 +14,7 @@ export const fetchProductsIds =
         try {
             const optionsIds: any = {
                 method: 'POST',
+                // referrerPolicy: 'unsafe_url',
                 // mode: "cors",
                 headers: {
                     'X-Auth': getPass(),
@@ -52,6 +53,7 @@ export const fetchProductsByIds =
         try {
             const optionsItems: any = {
                 method: 'POST',
+                // referrerPolicy: 'unsafe_url',
                 // mode: "cors",
                 headers: {
                     'X-Auth': getPass(),

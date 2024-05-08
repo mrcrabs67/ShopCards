@@ -24,3 +24,7 @@ export const siblingCountSelector = createSelector(
     (state: RootState) => state.products.siblingCount,
     (siblingCount) => siblingCount
 );
+export const loadingSelector = createSelector(
+    (state: RootState) => state.products.loading,
+    (loading) => loading
+);

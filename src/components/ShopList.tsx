@@ -6,6 +6,7 @@ import ShopCard from './ShopCard';
 import { useSelector, useDispatch } from 'react-redux';
 import {
     currentPageNumberSelector,
+    loadingSelector,
     maxPageNumberSelector,
     productsIdsSelector,
     productsSelector,
@@ -15,6 +16,7 @@ import { fetchProductsByIds } from '@store/products/thunks';
 import {
     DEFAULT_ITEMS_PER_PAGE,
     setCurrentPageNumber,
+    setLoading,
 } from '@store/products/reducer';
 
 const arrayRange = (start, stop, step) =>
@@ -30,7 +32,7 @@ export default function ShopList() {
     const productsIds = useSelector(productsIdsSelector);
     const maxPageNumber = useSelector(maxPageNumberSelector);
     const products = useSelector(productsSelector);
-    const siblingCount = useSelector(siblingCountSelector);
+    const loading = useSelector(loadingSelector);
 
     useEffect(() => {
         const lastItemIndex = DEFAULT_ITEMS_PER_PAGE * currentPageNumber;
@@ -51,6 +53,7 @@ export default function ShopList() {
             console.log('setCurrentPageNumber', number);
             if (currentPageNumber !== number) {
                 dispatch(setCurrentPageNumber(number));
+                dispatch(setLoading(false));
             }
         },
         [dispatch, currentPageNumber]
@@ -58,21 +61,25 @@ export default function ShopList() {
 
     return (
         <div className="box_tbl_list">
-            <table>
-                <thead>
-                    <tr>
-                        <th className="text-center">Номер</th>
-                        <th className="text-center">Название</th>
-                        <th className="text-center">Цена</th>
-                        <th className="text-center">Бренд</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {products.map((product: any) => (
-                        <ShopCard key={product.id} {...product} />
-                    ))}
-                </tbody>
-            </table>
+            {!loading ? (
+                <Preloader />
+            ) : (
+                <table>
+                    <thead>
+                        <tr>
+                            <th className="text-center">Номер</th>
+                            <th className="text-center">Название</th>
+                            <th className="text-center">Цена</th>
+                            <th className="text-center">Бренд</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {products.map((product: any) => (
+                            <ShopCard key={product.id} {...product} />
+                        ))}
+                    </tbody>
+                </table>
+            )}
             <div className="items">
                 <Pagination
                     activePage={currentPageNumber}

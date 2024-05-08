@@ -5,6 +5,7 @@ import {
     setMaxPageNumber,
     setProducts,
     setProductsIds,
+    setLoading,
 } from './reducer';
 import { API_URL_LIST, getPass } from '../../config';
 
@@ -78,6 +79,7 @@ export const fetchProductsByIds =
                     }));
                     dispatch(setProducts(resultItems));
                     dispatch(setErrorCode(null));
+                    dispatch(setLoading(true));
                 })
                 .catch((e) => {
                     // обработка ошибки, если надо

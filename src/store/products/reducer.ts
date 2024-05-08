@@ -22,6 +22,7 @@ export type ProductsState = {
     maxPageNumber: number;
     siblingCount: number; //(optional): represents the min number of page buttons to be shown on each side of the current page button. Defaults to 1.
     errorCode: string | null;
+    loading: boolean;
 };
 
 export const initialProductsState: ProductsState = {
@@ -31,6 +32,7 @@ export const initialProductsState: ProductsState = {
     maxPageNumber: 1,
     siblingCount: 1,
     errorCode: null,
+    loading: false,
 };
 
 const slice = createSlice({
@@ -52,6 +54,9 @@ const slice = createSlice({
         setErrorCode: (state, action: PayloadAction<string | null>) => {
             state.errorCode = action.payload;
         },
+        setLoading: (state, action: PayloadAction<boolean>) => {
+            state.loading = action.payload;
+        },
     },
 });
 
@@ -63,6 +68,7 @@ export const {
     setCurrentPageNumber,
     setMaxPageNumber,
     setErrorCode,
+    setLoading,
 } = slice.actions;
 
 export default reducer;

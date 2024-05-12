@@ -29,6 +29,7 @@
 
 table {
     border-collapse: collapse;
+    width: 100%;
 }
 
 TD, TH {
@@ -65,9 +66,15 @@ TD, TH {
     font-weight: 700;
 }
 
+.main {
+    display: flex;
+    flex-direction: column;
+}
+
 .box_tbl_list {
     display: flex;
     flex-direction: column;
+    align-items: center;
 }
 
 .pages {
@@ -82,4 +89,20 @@ TD, TH {
     align-items: center;
     justify-content: center;
     gap: 5px;
+}
+.filters {
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+    justify-content: center;
+    align-items: flex-end;
+    flex-wrap: nowrap;
+    width: 100%;
+}
+.inputfield {
+    border: 1px solid lightgray;
+}
+
+select {
+    color: black;
 }

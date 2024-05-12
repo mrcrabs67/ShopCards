@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import Preloader from './Preloader';
 import Pagination from 'react-js-pagination';
 import ShopCard from './ShopCard';
+import Main from '@components/Main';
 
 import { useSelector, useDispatch } from 'react-redux';
 import {
@@ -18,6 +19,10 @@ import {
     setCurrentPageNumber,
     setLoading,
 } from '@store/products/reducer';
+import Table from '@components/TableComp';
+import TableComp from '@components/TableComp';
+import { Input } from 'postcss';
+import InputFilters from '@components/InputFilters';
 
 const arrayRange = (start, stop, step) =>
     Array.from(
@@ -36,10 +41,11 @@ export default function ShopList() {
 
     useEffect(() => {
         const lastItemIndex = DEFAULT_ITEMS_PER_PAGE * currentPageNumber;
-        const foundedIds = productsIds?.slice(
-            lastItemIndex - (DEFAULT_ITEMS_PER_PAGE - 1),
-            lastItemIndex
-        );
+        const fistItemIndex =
+            currentPageNumber == 1
+                ? 0
+                : DEFAULT_ITEMS_PER_PAGE * (currentPageNumber - 1) + 1;
+        const foundedIds = productsIds?.slice(fistItemIndex, lastItemIndex + 1);
 
         dispatch(fetchProductsByIds(foundedIds));
     }, [dispatch, productsIds, currentPageNumber]);
@@ -60,26 +66,8 @@ export default function ShopList() {
     );
 
     return (
-        <div className="box_tbl_list">
-            {!loading ? (
-                <Preloader />
-            ) : (
-                <table>
-                    <thead>
-                        <tr>
-                            <th className="text-center">Номер</th>
-                            <th className="text-center">Название</th>
-                            <th className="text-center">Цена</th>
-                            <th className="text-center">Бренд</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {products.map((product: any) => (
-                            <ShopCard key={product.id} {...product} />
-                        ))}
-                    </tbody>
-                </table>
-            )}
+        <div className="main">
+            {!loading ? <Preloader /> : <Main />}
             <div className="items">
                 <Pagination
                     activePage={currentPageNumber}
@@ -89,25 +77,6 @@ export default function ShopList() {
                     onChange={changeCurrentPageNumberHandler}
                     activeClass={'activePage'}
                 />
-
-                {/*<div className="pages">*/}
-                {/*    {pageNumbers.map((pageNumber) => (*/}
-                {/*        <span*/}
-                {/*            onClick={() =>*/}
-                {/*                changeCurrentPageNumberHandler(pageNumber)*/}
-                {/*            }*/}
-                {/*            // disabled={ currentPageNumber === pageNumber }*/}
-                {/*            key={pageNumber}*/}
-                {/*            className={*/}
-                {/*                currentPageNumber === pageNumber*/}
-                {/*                    ? 'curent-page'*/}
-                {/*                    : 'page'*/}
-                {/*            }*/}
-                {/*        >*/}
-                {/*            {pageNumber}*/}
-                {/*        </span>*/}
-                {/*    ))}*/}
-                {/*</div>*/}
             </div>
         </div>
     );

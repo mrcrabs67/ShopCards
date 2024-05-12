@@ -6,6 +6,7 @@ import Footer from '../../components/Footer';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchProductsIds } from '@store/products/thunks';
 import { getPass } from '../../config';
+import ShopList from '@components/ShopList';
 
 const Home = () => {
     const dispatch = useDispatch();
@@ -22,7 +23,7 @@ const Home = () => {
         <ErrorBoundary>
             <div className="App">
                 <Header />
-                <Content />
+                <ShopList />
                 <Footer />
             </div>
         </ErrorBoundary>
